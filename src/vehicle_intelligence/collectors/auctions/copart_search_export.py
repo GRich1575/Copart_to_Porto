@@ -21,7 +21,8 @@ from pathlib import Path
 from pydantic import ValidationError
 from sqlalchemy.orm import Session, sessionmaker
 
-from vehicle_intelligence.collectors.auctions.copart_import import LotRow, upsert_lots
+from vehicle_intelligence.collectors.auctions.copart_import import PLATFORM_ID, LotRow, upsert_lots
+from vehicle_intelligence.models import AuctionLot
 from vehicle_intelligence.models.base import utcnow
 from vehicle_intelligence.monitoring import tracked_run
 
@@ -68,6 +69,9 @@ def parse_search_export(path: Path, vehicle_type: str | None = None) -> tuple[li
         if missing:
             raise ValueError(f"{path.name}: not a Copart search export; missing: {', '.join(missing)}")
         for line_no, raw in enumerate(reader, start=2):
+            if not _blank(raw.get("Title code")):
+                errors.append((line_no, "no title: excluded (owner rule)"))
+                continue
             try:
                 rows.append(LotRow(
                     lot_id=raw["Lot #"].strip(),
@@ -87,6 +91,24 @@ def parse_search_export(path: Path, vehicle_type: str | None = None) -> tuple[li
             except (ValidationError, ValueError) as exc:
                 errors.append((line_no, str(exc).splitlines()[0]))
     return rows, errors
+
+
+def discard_excluded(session_factory: sessionmaker[Session], mileage_cap: int | None = None) -> int:
+    """Delete stored Copart lots that fail the owner rules: no title, or odometer above mileage_cap.
+
+    Lots are discarded from the database, not just hidden. Re-import restores them only if they still
+    have a title and mileage within the cap.
+    """
+    from sqlalchemy import delete, or_
+
+    conds = [AuctionLot.title_type.is_(None), AuctionLot.title_type == ""]
+    if mileage_cap is not None:
+        conds.append(AuctionLot.mileage_miles > mileage_cap)
+    with session_factory() as s:
+        result = s.execute(delete(AuctionLot).where(
+            AuctionLot.platform_id == PLATFORM_ID, or_(*conds)))
+        s.commit()
+    return result.rowcount or 0
 
 
 def import_search_export(path: Path, session_factory: sessionmaker[Session],

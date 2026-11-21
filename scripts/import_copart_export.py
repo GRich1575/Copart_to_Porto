@@ -12,7 +12,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from vehicle_intelligence.collectors.auctions.copart_search_export import import_search_export
+from vehicle_intelligence.collectors.auctions.copart_search_export import discard_excluded, import_search_export
 from vehicle_intelligence.core.config import load_config
 from vehicle_intelligence.core.database import create_schema, make_engine, make_session_factory
 from vehicle_intelligence.core.logging import setup_logging
@@ -23,6 +23,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--file", type=Path, required=True)
     parser.add_argument("--vehicle-type", default=None, help="vehicle type of the search, e.g. motorcycle")
     parser.add_argument("--url", help="SQLAlchemy URL override")
+    parser.add_argument("--discard-excluded", action="store_true",
+                        help="also delete stored lots with no title or odometer above the watchlist cap")
     args = parser.parse_args(argv)
 
     cfg = load_config()
@@ -33,6 +35,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"accepted: {accepted}  rejected: {len(rejected)}")
     for line, msg in rejected:
         print(f"  line {line}: {msg}")
+    if args.discard_excluded:
+        cap = max(v.mileage_cap_miles for v in cfg.watchlist if v.active)
+        print(f"discarded stored lots: {discard_excluded(make_session_factory(engine), mileage_cap=cap)} (cap {cap} mi)")
     return 0
 
 
