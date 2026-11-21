@@ -17,7 +17,7 @@ HEADER = ("Lot URL,Lot #,Est. Retail value,Sale date,Year,Make,Model,Engine type
 URL = "https://www.copart.com/lot/{}"
 
 
-def _row(lot, odo="12,088 A", sale="11/25/2026 06:00 pm GMT", bid="1,800 USD", title="CERT OF TITLE", year="2019", vin="VINX"):
+def _row(lot, odo="12,088 A", sale="11/25/2026 06:00 pm GMT", bid="1,800 USD", title="CERT OF TITLE", year="2019", vin="aa9aa9999aa******"):
     # Values containing commas are quoted, as in the real Copart export.
     return (f"{URL.format(lot)},{lot},0,{sale},{year},HONDA,GL1800,6,6,{vin},{title},\"{odo}\",ACTUAL,"
             f"FRONT END,\"{bid}\",0 USD,1,SALE,0.0,N/A,\n")
@@ -101,3 +101,22 @@ def test_discard_excluded_removes_no_title_and_over_cap(export, sf):
     assert removed == 2  # lot 444 (no title) and lot 222 (64 591 > 60 000)
     with sf() as s:
         assert sorted(l.lot_id for l in s.query(AuctionLot).all()) == ["111", "333"]
+
+
+def test_invalid_vin_discarded_masked_vin_kept(export, sf):
+    from vehicle_intelligence.collectors.auctions.copart_search_export import discard_excluded
+    bad = "1HGCM82633A004354"   # check digit wrong (valid is ...352)
+    rows, errors = parse_search_export(export(_row("111", vin="aa9aa9999aa******"), _row("222", vin=bad)))
+    assert [r.lot_id for r in rows] == ["111"]
+    assert errors == [(3, "invalid VIN: excluded (owner rule)")]
+    # stored lot with invalid VIN is purged; masked-VIN lot is kept
+    with sf() as s:
+        s.add(AuctionLot(platform_id="copart_us", lot_id="333", country="US", make="HONDA", model="GL1800",
+                         year=2019, mileage_miles=3000, title_type="CERT", vin=bad, status="listed", currency="USD"))
+        s.add(AuctionLot(platform_id="copart_us", lot_id="444", country="US", make="HONDA", model="GL1800",
+                         year=2019, mileage_miles=3000, title_type="CERT", vin="aa9aa9999aa******",
+                         status="listed", currency="USD"))
+        s.commit()
+    assert discard_excluded(sf, mileage_cap=60000) == 1
+    with sf() as s:
+        assert sorted(l.lot_id for l in s.query(AuctionLot).all()) == ["444"]

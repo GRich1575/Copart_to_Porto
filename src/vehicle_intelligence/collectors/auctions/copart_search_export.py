@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from vehicle_intelligence.collectors.auctions.copart_import import PLATFORM_ID, LotRow, upsert_lots
 from vehicle_intelligence.models import AuctionLot
+from vehicle_intelligence.services.vin import vin_status
 from vehicle_intelligence.models.base import utcnow
 from vehicle_intelligence.monitoring import tracked_run
 
@@ -72,6 +73,9 @@ def parse_search_export(path: Path, vehicle_type: str | None = None) -> tuple[li
             if not _blank(raw.get("Title code")):
                 errors.append((line_no, "no title: excluded (owner rule)"))
                 continue
+            if vin_status(raw.get("VIN")) == "invalid":
+                errors.append((line_no, "invalid VIN: excluded (owner rule)"))
+                continue
             try:
                 rows.append(LotRow(
                     lot_id=raw["Lot #"].strip(),
@@ -94,12 +98,12 @@ def parse_search_export(path: Path, vehicle_type: str | None = None) -> tuple[li
 
 
 def discard_excluded(session_factory: sessionmaker[Session], mileage_cap: int | None = None) -> int:
-    """Delete stored Copart lots that fail the owner rules: no title, or odometer above mileage_cap.
+    """Delete stored Copart lots that fail the owner rules: no title, invalid VIN, or odometer above mileage_cap.
 
     Lots are discarded from the database, not just hidden. Re-import restores them only if they still
     have a title and mileage within the cap.
     """
-    from sqlalchemy import delete, or_
+    from sqlalchemy import delete, or_, select
 
     conds = [AuctionLot.title_type.is_(None), AuctionLot.title_type == ""]
     if mileage_cap is not None:
@@ -107,8 +111,13 @@ def discard_excluded(session_factory: sessionmaker[Session], mileage_cap: int | 
     with session_factory() as s:
         result = s.execute(delete(AuctionLot).where(
             AuctionLot.platform_id == PLATFORM_ID, or_(*conds)))
+        bad_vin_ids = [lot.id for lot in s.scalars(
+            select(AuctionLot).where(AuctionLot.platform_id == PLATFORM_ID, AuctionLot.vin.is_not(None)))
+            if vin_status(lot.vin) == "invalid"]
+        if bad_vin_ids:
+            s.execute(delete(AuctionLot).where(AuctionLot.id.in_(bad_vin_ids)))
         s.commit()
-    return result.rowcount or 0
+    return (result.rowcount or 0) + len(bad_vin_ids)
 
 
 def import_search_export(path: Path, session_factory: sessionmaker[Session],
