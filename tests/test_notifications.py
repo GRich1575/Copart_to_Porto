@@ -79,8 +79,47 @@ def test_pending_and_mark_sent(sf):
         b = svc.flag_lot(s, "333", WATCH)
         ids = [a.id, b.id]
     with sf() as s:
-        assert [n.lot_id for n in svc.pending(s)] == ["65038036", "333"]
+        assert [n.lot_id for n, _ in svc.pending(s)] == ["65038036", "333"]
         assert svc.mark_sent(s, [ids[0]]) == 1
     with sf() as s:
-        assert [n.lot_id for n in svc.pending(s)] == ["333"]
+        assert [n.lot_id for n, _ in svc.pending(s)] == ["333"]
         assert s.query(ProxyNotification).filter(ProxyNotification.sent_at.is_not(None)).count() == 1
+
+
+def _set_date(sf, lot_id, when):
+    with sf() as s:
+        lot = s.query(AuctionLot).filter_by(lot_id=lot_id).one()
+        lot.auction_date = when
+        s.commit()
+
+
+def test_waiting_list_goes_below_dated_lots(sf):
+    _store(sf, lot_id="W1", auction_date=None)   # flagged first, but undated
+    _store(sf, lot_id="D2", auction_date=datetime(2026, 12, 9, 18, 0, tzinfo=timezone.utc))
+    _store(sf, lot_id="D1", auction_date=datetime(2026, 11, 25, 18, 0, tzinfo=timezone.utc))
+    _store(sf, lot_id="W2", auction_date=None)
+    with sf() as s:
+        for lot in ["W1", "D2", "D1", "W2"]:
+            svc.flag_lot(s, lot, WATCH)
+    with sf() as s:
+        order = [(n.lot_id, svc.is_waiting(d)) for n, d in svc.pending(s)]
+    # dated lots first by earliest date, then waiting list in flag order
+    assert order == [("D1", False), ("D2", False), ("W1", True), ("W2", True)]
+
+
+def test_waiting_lot_moves_up_when_date_appears(sf):
+    _store(sf, lot_id="W1", auction_date=None)
+    _store(sf, lot_id="D1", auction_date=datetime(2026, 11, 25, 18, 0, tzinfo=timezone.utc))
+    with sf() as s:
+        svc.flag_lot(s, "W1", WATCH)
+        svc.flag_lot(s, "D1", WATCH)
+    _set_date(sf, "W1", datetime(2026, 11, 20, 18, 0, tzinfo=timezone.utc))  # later import adds a date
+    with sf() as s:
+        assert [n.lot_id for n, _ in svc.pending(s)] == ["W1", "D1"]  # earlier date now first
+
+
+def test_undated_lot_can_still_be_flagged(sf):
+    _store(sf, lot_id="W9", auction_date=None)
+    with sf() as s:
+        note = svc.flag_lot(s, "W9", WATCH)
+        assert note.lot_id == "W9"

@@ -8,7 +8,7 @@ The eligibility decision is the owner's manual review. This service only enforce
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from vehicle_intelligence.core.config import VehicleSpec
 from vehicle_intelligence.models import AuctionLot, ProxyNotification
 from vehicle_intelligence.models.base import utcnow
+from vehicle_intelligence.monitoring.ledger import as_aware
 from vehicle_intelligence.services.vehicle_matching import VehicleFacts, match_watchlist
 
 
@@ -58,10 +59,26 @@ def flag_lot(session: Session, lot_id: str, watchlist: list[VehicleSpec], platfo
     return note
 
 
-def pending(session: Session) -> list[ProxyNotification]:
-    return list(session.scalars(
-        select(ProxyNotification).where(ProxyNotification.sent_at.is_(None)).order_by(ProxyNotification.id)
-    ))
+def pending(session: Session) -> list[tuple[ProxyNotification, datetime | None]]:
+    """Unsent notifications in dispatch order, with the lot's current auction date.
+
+    Priority: lots with an auction date first (earliest date first), then the waiting list
+    (no date yet, in flag order). Dates are read from the lot at query time, so a waiting lot
+    moves up as soon as a later import gives it a date.
+    """
+    rows = session.execute(
+        select(ProxyNotification, AuctionLot.auction_date)
+        .join(AuctionLot, AuctionLot.id == ProxyNotification.auction_lot_id)
+        .where(ProxyNotification.sent_at.is_(None))
+    ).all()
+    return sorted(
+        ((note, as_aware(date)) for note, date in rows),
+        key=lambda r: (r[1] is None, r[1] or datetime.max.replace(tzinfo=timezone.utc), r[0].flagged_at, r[0].id),
+    )
+
+
+def is_waiting(date: datetime | None) -> bool:
+    return date is None
 
 
 def mark_sent(session: Session, ids: list[int], now: datetime | None = None) -> int:
