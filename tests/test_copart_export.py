@@ -17,7 +17,7 @@ HEADER = ("Lot URL,Lot #,Est. Retail value,Sale date,Year,Make,Model,Engine type
 URL = "https://www.copart.com/lot/{}"
 
 
-def _row(lot, odo="12,088 A", sale="11/25/2026 06:00 pm GMT", bid="1,800 USD", title="", year="2019", vin="VINX"):
+def _row(lot, odo="12,088 A", sale="11/25/2026 06:00 pm GMT", bid="1,800 USD", title="CERT OF TITLE", year="2019", vin="VINX"):
     # Values containing commas are quoted, as in the real Copart export.
     return (f"{URL.format(lot)},{lot},0,{sale},{year},HONDA,GL1800,6,6,{vin},{title},\"{odo}\",ACTUAL,"
             f"FRONT END,\"{bid}\",0 USD,1,SALE,0.0,N/A,\n")
@@ -43,7 +43,7 @@ def sf(tmp_path):
 def test_column_conversions(export):
     rows, errors = parse_search_export(export(_row("111", odo="12,088 A", bid="1,800 USD",
                                                    sale="11/25/2026 06:00 pm GMT", title="SALVAGE VEHICLE TITLE"),
-                                              _row("222", odo="2,872", sale="Future", bid="0 USD", title="")),
+                                              _row("222", odo="2,872", sale="Future", bid="0 USD")),
                                           vehicle_type="motorcycle")
     assert errors == []
     a, b = rows
@@ -52,7 +52,7 @@ def test_column_conversions(export):
     assert a.current_bid == Decimal("1800") and b.current_bid == Decimal("0")
     assert a.auction_date == datetime(2026, 11, 25, 18, 0, tzinfo=timezone.utc)  # pm -> 18:00 UTC
     assert b.auction_date is None                                     # "Future"
-    assert a.title_type == "SALVAGE VEHICLE TITLE" and b.title_type is None
+    assert a.title_type == "SALVAGE VEHICLE TITLE" and b.title_type == "CERT OF TITLE"
     assert a.status == "listed" and a.vehicle_type == "motorcycle"
     assert a.source_url == URL.format("111")
 
@@ -81,3 +81,23 @@ def test_import_upserts_and_records_run(export, sf):
         assert float(lot.current_bid) == 525.0 and lot.platform_id == "copart_us"
         run = s.query(CollectorRun).filter_by(job=JOB).order_by(CollectorRun.id.desc()).first()
         assert run.status == "success" and run.rows == 2
+
+
+def test_lot_without_title_is_discarded_at_import(export):
+    rows, errors = parse_search_export(export(_row("111"), _row("222", title="")))
+    assert [r.lot_id for r in rows] == ["111"]
+    assert errors == [(3, "no title: excluded (owner rule)")]
+
+
+def test_discard_excluded_removes_no_title_and_over_cap(export, sf):
+    from vehicle_intelligence.collectors.auctions.copart_search_export import discard_excluded
+    p = export(_row("111", odo="12,000"), _row("222", odo="64,591"), _row("333", odo="5,000"))
+    import_search_export(p, sf, vehicle_type="motorcycle")
+    with sf() as s:  # simulate lots stored before the title rule existed
+        s.add(AuctionLot(platform_id="copart_us", lot_id="444", country="US", make="HONDA", model="GL1800",
+                         year=2019, mileage_miles=3000, title_type=None, status="listed", currency="USD"))
+        s.commit()
+    removed = discard_excluded(sf, mileage_cap=60000)
+    assert removed == 2  # lot 444 (no title) and lot 222 (64 591 > 60 000)
+    with sf() as s:
+        assert sorted(l.lot_id for l in s.query(AuctionLot).all()) == ["111", "333"]

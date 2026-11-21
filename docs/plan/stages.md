@@ -39,6 +39,7 @@ Status: in progress
 Depends: S1
 - [x] 3.1 Copart (USA) lot import from owner-exported CSV; no automated scraping (docs/sources/copart.md) — tests: tests/test_collector_auctions.py
 - [x] 3.1b Copart search-results export adapter (owner-saved CSV) + import CLI — tests: tests/test_copart_export.py
+- [x] 3.1c Discard Copart lots without title at import; purge them from the local DB — tests: tests/test_copart_export.py
 - [ ] 3.2 Local used-vehicle market collector — tests: tests/test_collector_local.py
 - [ ] 3.3 Regulations & fees registry (country-level, cross-country rules) — tests: tests/test_collector_regs.py
 - [ ] 3.4 Logistics quotes collector — tests: tests/test_collector_logistics.py
