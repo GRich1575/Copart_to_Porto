@@ -30,7 +30,7 @@ Depends: S0
 Status: in progress
 Depends: S1
 - [x] 2.1 Watchlist matching (type, brand, model, year, cc, mileage cap) — tests: tests/test_watchlist.py
-- [ ] 2.2 Import cost model (auction fee, transport, container, port, last mile, duties, registration) — tests: tests/test_import_cost.py
+- [x] 2.2 Import cost model (auction fee, transport, container, port, last mile, duties, registration) — tests: tests/test_import_cost.py
 - [ ] 2.3 Profitability decision (resale ≥10% below local median, minimum edge, max bid) — tests: tests/test_profitability.py
 
 ## S3 — Data collectors (external sites; needs verified sources)

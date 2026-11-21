@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from decimal import Decimal
 from pathlib import Path
 from typing import Literal, Mapping
 
@@ -82,11 +83,31 @@ class Platforms(BaseModel):
         return self
 
 
+class Economics(BaseModel):
+    """Money inputs for import economics (config/economics.yaml). All amounts are in `currency`."""
+
+    currency: str = Field(default="USD", pattern=r"^[A-Z]{3}$")
+    resale_discount: Decimal = Field(default=Decimal("0.10"), ge=0, lt=1)
+    min_edge: Decimal = Field(default=Decimal("1500"), ge=0)
+    min_comparables: int = Field(default=3, ge=1)
+    auction_fee_percent: Decimal = Field(default=Decimal("0"), ge=0, lt=1)
+    auction_fee_fixed: Decimal = Field(default=Decimal("0"), ge=0)
+    transport_to_port: Decimal = Field(default=Decimal("0"), ge=0)
+    port_load: Decimal = Field(default=Decimal("0"), ge=0)
+    container_shipping: Decimal = Field(default=Decimal("0"), ge=0)
+    port_unload: Decimal = Field(default=Decimal("0"), ge=0)
+    documents_fee: Decimal = Field(default=Decimal("0"), ge=0)
+    last_mile: Decimal = Field(default=Decimal("0"), ge=0)
+    customs_duty_percent: Decimal = Field(default=Decimal("0"), ge=0, lt=1)
+    registration_fee: Decimal = Field(default=Decimal("0"), ge=0)
+
+
 class AppConfig(BaseModel):
     settings: Settings
     countries: list[Country]
     platforms: list[Platform]
     watchlist: list[VehicleSpec]
+    economics: Economics
 
     @field_validator("platforms")
     @classmethod
@@ -118,4 +139,7 @@ def load_config(config_dir: Path = DEFAULT_CONFIG_DIR, env: Mapping[str, str] | 
     countries = Countries.model_validate(_read_yaml(config_dir / "countries.yaml")).countries
     platforms = Platforms.model_validate(_read_yaml(config_dir / "platforms.yaml")).platforms
     watchlist = Watchlist.model_validate(_read_yaml(config_dir / "vehicle_watchlist.yaml")).vehicles
-    return AppConfig(settings=settings, countries=countries, platforms=platforms, watchlist=watchlist)
+    economics = Economics.model_validate(_read_yaml(config_dir / "economics.yaml"))
+    return AppConfig(
+        settings=settings, countries=countries, platforms=platforms, watchlist=watchlist, economics=economics
+    )
