@@ -37,7 +37,13 @@ class VehicleSpec(BaseModel):
     variants: list[str] = Field(default_factory=list)
     min_year: int = Field(ge=1900, le=2100)
     max_mileage_miles: int = Field(gt=0)
+    # Extra miles admitted above max_mileage_miles. Owner rule: hard cap = max + tolerance (60 000 for GL1800).
+    mileage_tolerance_miles: int = Field(default=0, ge=0, le=10000)
     active: bool = True
+
+    @property
+    def mileage_cap_miles(self) -> int:
+        return self.max_mileage_miles + self.mileage_tolerance_miles
 
 
 class Watchlist(BaseModel):

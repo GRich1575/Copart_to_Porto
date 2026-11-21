@@ -1,7 +1,8 @@
 """Match an auction lot or listing against the watchlist (Business_Model.txt item 0).
 
 A lot matches a watchlist vehicle when: vehicle type and brand are equal, the model or one of the
-variants appears in the lot text, year >= min_year and mileage <= max_mileage_miles.
+variants appears in the lot text, year >= min_year and mileage <= mileage_cap_miles
+(max_mileage_miles + mileage_tolerance_miles, hard cap; owner rule: 50 000 + up to 10 000 = 60 000).
 Missing year or mileage never matches (reason is reported instead).
 """
 
@@ -52,8 +53,8 @@ def match_vehicle(facts: VehicleFacts, spec: VehicleSpec) -> MatchResult:
 
     if facts.mileage_miles is None:
         reasons.append("mileage unknown")
-    elif facts.mileage_miles > spec.max_mileage_miles:
-        reasons.append(f"mileage {facts.mileage_miles} > {spec.max_mileage_miles}")
+    elif facts.mileage_miles > spec.mileage_cap_miles:
+        reasons.append(f"mileage {facts.mileage_miles} > {spec.mileage_cap_miles}")
 
     return MatchResult(spec_id=spec.id, matched=not reasons, reasons=tuple(reasons))
 
