@@ -44,7 +44,7 @@ Depends: S1
 - [x] 3.1c Discard Copart lots without title at import; purge them from the local DB — tests: tests/test_copart_export.py
 - [x] 3.1d VIN validity: fully visible VIN that fails format or North-American check digit is excluded; masked or blank VIN is kept — tests: tests/test_vin.py
 - [x] 3.1e Salvage-title exclusion (SALVAGE, NON-REPAIRABLE, JUNK, DESTRUCTION) at import, purge and proxy flag — tests: tests/test_title.py
-- [ ] 3.2 Local used-vehicle market collector — tests: tests/test_collector_local.py
+- [x] 3.2 Portugal local listings import from owner-exported CSV; automation off until ToS checked (docs/sources/portugal_local_market.md) — tests: tests/test_collector_local.py
 - [ ] 3.3 Regulations & fees registry (country-level, cross-country rules) — tests: tests/test_collector_regs.py
 - [ ] 3.4 Logistics quotes collector — tests: tests/test_collector_logistics.py
 - [ ] 3.5 Historical finished-auction prices collector — tests: tests/test_collector_historical.py

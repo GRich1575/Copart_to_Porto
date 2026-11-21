@@ -1,7 +1,33 @@
-# Auction / listing platforms. Keep enabled: false until access and terms are verified (S3).
+# Auction / listing platforms. enabled: false = not automated. Local listings are imported from
+# owner-exported CSV only until each site's terms are verified (docs/sources/).
 platforms:
   - id: copart_us
     name: Copart (USA)
     country: US
     kind: auction
+    enabled: false
+  - id: standvirtual_pt
+    name: Standvirtual (PT, motorcycles)
+    country: PT
+    kind: local_listing
+    enabled: false
+  - id: olx_pt
+    name: OLX Portugal
+    country: PT
+    kind: local_listing
+    enabled: false
+  - id: custojusto_pt
+    name: CustoJusto (PT)
+    country: PT
+    kind: local_listing
+    enabled: false
+  - id: facebook_marketplace_pt
+    name: Facebook Marketplace (PT)
+    country: PT
+    kind: local_listing
+    enabled: false
+  - id: auto_moto_pt
+    name: AUTO.MOTO.pt
+    country: PT
+    kind: local_listing
     enabled: false
