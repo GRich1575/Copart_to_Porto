@@ -1,7 +1,7 @@
 # PROGRESS — Vehicle Import & Resale Intelligence Platform
 
-Updated: 2026-11-21 | Branch: feature/stage2-import-economics (PR pending) | main = S1 merged (PR #2, 631f17f)
-Current stage: S2 done (on branch). Next: S3 is blocked by verified sources; S4 needs S3.
+Updated: 2026-11-21 | Branch: main (clean) | main = S2 merged (PR #3, 6276174); branches S0–S2 deleted
+Current stage: S2 done. Next: S3 blocked on user decision (verified sources); S4 needs S3.
 Requirements: `Business_Model.txt` (watch: Honda Gold Wing GL1800/F6B, year ≥ 2018, mileage ≤ 50 000 mi).
 
 ## Stage map (full detail + DoD: `docs/plan/stages.md`)
@@ -9,7 +9,7 @@ Requirements: `Business_Model.txt` (watch: Honda Gold Wing GL1800/F6B, year ≥ 
 |---|---|---|---|
 | S0 | Process, PROGRESS, repo checker, CI `checks` | — | done (merged #1) |
 | S1 | Foundation: package, config, logging, schema, self-monitoring | S0 | done (merged #2) |
-| S2 | Import economics: watchlist match, import cost, profit/edge decision | S1 | done (branch) |
+| S2 | Import economics: watchlist match, import cost, profit/edge decision | S1 | done (merged #3) |
 | S3 | Collectors: auctions, local market, regulations, logistics, historical | S1 | blocked (verified sources) |
 | S4 | Scheduler workflows + Streamlit dashboard | S2, S3 | not started |
 | S5 | Docker Compose release + no-LLM self-monitoring acceptance | S4 | not started |
