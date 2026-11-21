@@ -55,3 +55,29 @@ def test_watchlist_skips_inactive_entries():
     inactive = SPEC.model_copy(update={"id": "old", "active": False})
     results = match_watchlist(_facts(), [inactive, SPEC])
     assert [r.spec_id for r in results] == ["gw"]
+
+
+TOLERANT = SPEC.model_copy(update={"mileage_tolerance_miles": 10000})
+
+
+def test_tolerance_admits_up_to_60000_inclusive():
+    assert TOLERANT.mileage_cap_miles == 60000
+    assert match_vehicle(_facts(mileage_miles=60000), TOLERANT).matched
+
+
+def test_above_60000_excluded_even_with_tolerance():
+    r = match_vehicle(_facts(mileage_miles=60001), TOLERANT)
+    assert not r.matched and "mileage 60001 > 60000" in r.reasons
+    assert not match_vehicle(_facts(mileage_miles=70879), TOLERANT).matched
+
+
+def test_no_tolerance_keeps_strict_50000_cap():
+    assert SPEC.mileage_cap_miles == 50000
+    assert not match_vehicle(_facts(mileage_miles=50001), SPEC).matched
+
+
+def test_tolerance_above_10000_rejected_by_config():
+    import pytest
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError):
+        SPEC.model_validate({**SPEC.model_dump(), "mileage_tolerance_miles": 10001})

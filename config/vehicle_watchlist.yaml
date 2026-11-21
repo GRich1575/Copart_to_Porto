@@ -7,4 +7,5 @@ vehicles:
     variants: ["GL1800", "F6B"]
     min_year: 2018
     max_mileage_miles: 50000
+    mileage_tolerance_miles: 10000   # owner: accept up to +10 000 mi; anything above 60 000 is excluded
     active: true
