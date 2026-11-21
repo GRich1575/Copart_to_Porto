@@ -22,3 +22,10 @@ Status: decided 2026-11-21. Owner decision: platform = Copart (USA).
 - Columns used: Lot #, Make, Model, Year, VIN, Odometer, Damage description, Title code, Current bid, Sale date, Lot URL.
 - Odometer "12,088 A": miles (assumed; US units), trailing " A" = actual reading. Sale date "MM/DD/YYYY hh:mm am|pm GMT"; "Future" or blank = no date.
 - Observed on the 15-lot export: 2 lots above 50,900 mi (the search's odometer filter does not enforce the cap exactly); 6 lots at 0 mi without a title (may mean "not reported").
+
+## Operating scheme (owner, 2026-11-21)
+- Manual review decides eligibility for restoration; the system never auto-flags a lot.
+- Purchases go through a registered Copart Broker (Member Terms: Brokers buy on Copart and sell to the customer; Copart is not a party).
+- Destination: Portugal (EU). Owner is not a Russian resident or company, so the Russia/Belarus export bar does not apply to the owner's own account. Sanctions screening of the broker still applies.
+- Notification to the proxy dealer contains only: lot number, auction date, lot link (`scripts/proxy_notifications.py`).
+- Owner states internal use of the manual CSV is "permitted". No written confirmation from Copart is on file; the Image and Data License (Section 3) does not list internal analysis. Get written confirmation before relying on it.

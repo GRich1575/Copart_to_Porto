@@ -5,6 +5,7 @@ from vehicle_intelligence.models.base import Base
 from vehicle_intelligence.models.logistics import ShipmentQuote
 from vehicle_intelligence.models.market import LocalListing
 from vehicle_intelligence.models.monitoring import CollectorRun
+from vehicle_intelligence.models.notification import ProxyNotification
 from vehicle_intelligence.models.regulation import FeeRule, ImportRule
 from vehicle_intelligence.models.repair import RepairEstimate
 
@@ -17,4 +18,5 @@ __all__ = [
     "ShipmentQuote",
     "RepairEstimate",
     "CollectorRun",
+    "ProxyNotification",
 ]

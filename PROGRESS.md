@@ -1,6 +1,6 @@
 # PROGRESS — Vehicle Import & Resale Intelligence Platform
 
-Updated: 2026-11-21 | Branch: feature/vin-validity (PR pending) | main = title rule merged (#8)
+Updated: 2026-11-21 | Branch: feature/proxy-notifications (PR pending) | main = VIN rule merged (#9)
 Current stage: S3 in progress (3.1, 3.1b done). Next: S3.2–3.5 need sources; S4 needs S3.
 Requirements: `Business_Model.txt` (watch: Honda Gold Wing GL1800/F6B, year ≥ 2018, mileage ≤ 50 000 mi).
 Auction platform: Copart (USA). Access: owner-exported CSV only (`docs/sources/copart.md`).
@@ -26,7 +26,8 @@ Auction platform: Copart (USA). Access: owner-exported CSV only (`docs/sources/c
 - `collectors/auctions/copart_search_export.py` + `scripts/import_copart_export.py`: owner's search-results CSV → auction_lot. Run on 2026-11-21 export: 15 accepted, 0 rejected (local SQLite `data/local.db`, not versioned).
 - `collectors/auctions/copart_import.py`: CSV import (template `docs/sources/copart_import_template.csv`), per-row validation, upsert by (copart_us, lot_id), rejected rows logged with line numbers, run in `collector_run` (job `copart_import`).
 - Mileage rule (owner, 2026-11-21): hard cap = 50 000 + 10 000 tolerance = 60 000 mi (step 2.4).
-- Tests: 86 pass, 1 skipped (Postgres integration).
+- Step 2.5 (proxy notification): `scripts/proxy_notifications.py` flag / pending / sent. Flag only for a stored, titled lot that matches the watchlist, once per lot. Output: lot #, auction date, lot link.
+- Tests: 92 pass, 1 skipped (Postgres integration).
 - Title rule (owner, 2026-11-21, step 3.1c): lots without title are rejected at import and deleted from the local DB (`--discard-excluded`). Local DB now: 4 lots (all titled, ≤ 60 000 mi).
 - VIN rule (owner, 2026-11-21, step 3.1d): masked or partially masked VIN (contains '*') = kept; blank = kept; fully visible but malformed (not 17 chars, I/O/Q, or wrong North-American check digit) = excluded and discarded. Local DB: all 4 stored lots masked, so none discarded.
 
@@ -40,7 +41,7 @@ Auction platform: Copart (USA). Access: owner-exported CSV only (`docs/sources/c
 6. Economics: min_edge 1500 (lower bound) vs 2000; fee rates unset.
 
 ## Next steps
-1. Merge VIN-validity PR; sync main. 2. S3.2 sources (owner).
+1. Merge proxy-notification PR; sync main. 2. Owner: written Copart confirmation for manual CSV use; choose Copart broker. 3. S3.2 sources.
 2. Owner: destination EU country, local-market sources (3.2), Copart CSV export path.
 
 ## Update rule

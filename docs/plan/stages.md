@@ -33,6 +33,7 @@ Depends: S1
 - [x] 2.2 Import cost model (auction fee, transport, container, port, last mile, duties, registration) — tests: tests/test_import_cost.py
 - [x] 2.3 Profitability decision (resale ≥10% below local median, minimum edge, max bid) — tests: tests/test_profitability.py
 - [x] 2.4 Mileage cap = max + tolerance (hard cap 60 000 for GL1800) — tests: tests/test_watchlist.py
+- [x] 2.5 Eligible-lot notification output: manual flag, watchlist re-check, minimal export (lot #, auction date, lot link) — tests: tests/test_notifications.py
 
 ## S3 — Data collectors (external sites; needs verified sources)
 Status: in progress
