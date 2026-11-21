@@ -1,7 +1,7 @@
 # PROGRESS — Vehicle Import & Resale Intelligence Platform
 
-Updated: 2026-11-21 | Branch: feature/local-market-import (PR pending) | main = salvage exclusion merged (#12)
-Current stage: S3 in progress (3.1, 3.1b–e, 3.2 done). Next: 3.3 regulations (needs verified sources). Next: S3.2–3.5 need sources; S4 needs S3.
+Updated: 2026-11-21 (end of session) | Branch: main (clean) | main = docs/warranty-term merged (#15)
+Current stage: S3 in progress (3.1, 3.1b–e, 3.2 done). Blocked: 3.3 (needs verified official PT sources), 3.4 (carrier quotes), 3.5 (sold-price source). Next: S3.2–3.5 need sources; S4 needs S3.
 Requirements: `Business_Model.txt` (watch: Honda Gold Wing GL1800/F6B, year ≥ 2018, mileage ≤ 50 000 mi).
 Auction platform: Copart (USA). Access: owner-exported CSV only (`docs/sources/copart.md`).
 
@@ -49,6 +49,12 @@ Owner decision (2026-11-21): warranty offered to buyers is at most 3 months. Not
 ## Next steps
 1. Merge local-market PR; sync main. 2. Owner: written Copart confirmation for manual CSV use; choose Copart broker. 3. S3.2 sources.
 2. Owner: destination = Portugal (answered). Local listings: export CSV from the listed platforms (template docs/sources/local_listings_template.csv). Copart: written confirmation for CSV use.
+
+## Resume tomorrow
+1. Owner: sample Portuguese listing CSV (template docs/sources/local_listings_template.csv) to test import.
+2. Owner: currency approach (fixed EUR/USD rate or live source) for profitability.
+3. Owner: written Copart confirmation for CSV use; broker sanctions check; PT import review.
+4. Then 3.3 (official PT fee sources), 3.4, 3.5, then S4 (scheduler, dashboard), S5.
 
 ## Update rule
 At the end of each session/stage: update date, stage status, done, open, next. ≤60 lines, no secrets or personal data.
