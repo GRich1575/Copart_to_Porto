@@ -18,13 +18,13 @@ Depends: —
 - [x] 0.3 CI workflow `checks` (checker + pytest) — tests: tests/test_check_repo.py
 
 ## S1 — Foundation (config, DB, self-monitoring)
-Status: not started
+Status: done
 Depends: S0
 - [x] 1.1 Package skeleton, pyproject, pytest setup — tests: tests/test_skeleton.py
 - [x] 1.2 Config loader (settings + countries/platforms/watchlist YAML, validated) — tests: tests/test_config.py
 - [x] 1.3 Logging setup (structured, file + stdout) — tests: tests/test_logging.py
 - [x] 1.4 PostgreSQL schema (SQLAlchemy 2) + init_db script — tests: tests/test_db_schema.py
-- [ ] 1.5 Self-monitoring: run ledger, health checks, threshold alerts, no LLM — tests: tests/test_monitoring.py
+- [x] 1.5 Self-monitoring: run ledger, health checks, threshold alerts, no LLM — tests: tests/test_monitoring.py
 
 ## S2 — Import economics engine (pure logic, no network)
 Status: not started
