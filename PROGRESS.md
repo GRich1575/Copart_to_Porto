@@ -1,16 +1,17 @@
 # PROGRESS — Vehicle Import & Resale Intelligence Platform
 
-Updated: 2026-11-21 | Branch: main (clean) | main = S2 merged (PR #3, 6276174); branches S0–S2 deleted
-Current stage: S2 done. Next: S3 blocked on user decision (verified sources); S4 needs S3.
+Updated: 2026-11-21 | Branch: feature/stage3-copart-import (PR pending) | main = S2 merged (#3) + sync (#4)
+Current stage: S3 in progress (3.1 done on branch). Next: S3.2–3.5 need sources; S4 needs S3.
 Requirements: `Business_Model.txt` (watch: Honda Gold Wing GL1800/F6B, year ≥ 2018, mileage ≤ 50 000 mi).
+Auction platform: Copart (USA). Access: owner-exported CSV only (`docs/sources/copart.md`).
 
 ## Stage map (full detail + DoD: `docs/plan/stages.md`)
 | Stage | Content | Depends | Status |
 |---|---|---|---|
-| S0 | Process, PROGRESS, repo checker, CI `checks` | — | done (merged #1) |
-| S1 | Foundation: package, config, logging, schema, self-monitoring | S0 | done (merged #2) |
-| S2 | Import economics: watchlist match, import cost, profit/edge decision | S1 | done (merged #3) |
-| S3 | Collectors: auctions, local market, regulations, logistics, historical | S1 | blocked (verified sources) |
+| S0 | Process, PROGRESS, repo checker, CI `checks` | — | done (#1) |
+| S1 | Foundation: package, config, logging, schema, self-monitoring | S0 | done (#2) |
+| S2 | Import economics: watchlist match, import cost, buy decision | S1 | done (#3) |
+| S3 | Collectors: auctions, local market, regulations, logistics, historical | S1 | in progress: 3.1 done |
 | S4 | Scheduler workflows + Streamlit dashboard | S2, S3 | not started |
 | S5 | Docker Compose release + no-LLM self-monitoring acceptance | S4 | not started |
 
@@ -21,24 +22,21 @@ Requirements: `Business_Model.txt` (watch: Honda Gold Wing GL1800/F6B, year ≥ 
 4. Push → PR → CI `checks` green → `gh pr merge --squash --delete-branch` → sync main.
 5. Do not start a stage whose `Depends` stages are not `done`.
 
-## S2 — what exists
-- `services/vehicle_matching.py`: `match_vehicle` / `match_watchlist` (type, brand, model or variant, year ≥ min, mileage ≤ max; unknown year/mileage = no match).
-- `services/import_cost.py`: `landed_cost()` itemised; `cost_line()` linear model used to solve max bid.
-- `services/profitability.py`: `decide()` → BUY / PASS / NEEDS_DATA; target resale = median local price × (1 − 10%); expected profit ≥ min_edge (1500).
-- `config/economics.yaml`: only Business_Model numbers set (container 350, documents 100, 10%, 1500); all other fees 0 = unverified.
-- Tests: 61 pass, 1 skipped (Postgres integration).
+## S3 — what exists
+- `collectors/auctions/copart_import.py`: CSV import (template `docs/sources/copart_import_template.csv`), per-row validation, upsert by (copart_us, lot_id), rejected rows logged with line numbers, run in `collector_run` (job `copart_import`).
+- Tests: 67 pass, 1 skipped (Postgres integration).
 
 ## Open / blockers
-1. Postgres 17 listens on localhost:5432 but no credentials for this project. Set `TEST_DATABASE_URL` to run the skipped schema test; do not reuse other projects' `.env`.
-2. S3 blocked: no verified list of auction/market/regulation sources; sites not checked yet.
-3. Alembic migrations not added (schema is `create_all`); decide before S5.
-4. `.env` loading not implemented: use real environment variables.
-5. Economics: `min_edge` uses the 1500 lower bound; 2000 is the upper bound. Confirm which one to use. Fee rates (auction, transport, port, duty, registration, last mile) are unset.
-6. Customs duty assumed on (bid + container). Verify basis in S3.
+1. Copart: UK licence bans scraping; US terms not yet read; no official API found. No automated Copart access is built. Owner to decide: read full US terms and/or request written data-licence terms from Copart before any automated collector.
+2. Historical sold prices (3.5): no documented source yet (Copart purchase history in the owner's account is the candidate).
+3. 3.2 local market, 3.3 regulations, 3.4 logistics: need sources (destination country not chosen yet).
+4. Postgres: no project credentials; set `TEST_DATABASE_URL` to run the skipped test.
+5. Alembic not added; decide before S5. `.env` loading not implemented.
+6. Economics: min_edge 1500 (lower bound) vs 2000; fee rates unset.
 
 ## Next steps
-1. Merge S2 PR; sync main.
-2. S3 needs a decision: verified source list (auction platforms, local listings, regulations) before any collector work.
+1. Merge S3.1 PR; sync main.
+2. Owner: destination EU country, local-market sources (3.2), Copart CSV export path.
 
 ## Update rule
 At the end of each session/stage: update date, stage status, done, open, next. ≤60 lines, no secrets or personal data.
