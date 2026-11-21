@@ -1,4 +1,5 @@
 import json
+import shutil
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -101,19 +102,16 @@ def test_tracked_run_records_failure_and_reraises(sf):
 
 
 def test_cli_exit_code_follows_worst_level(tmp_path, sf):
+    from vehicle_intelligence.core.config import DEFAULT_CONFIG_DIR
+
     cfg_dir = tmp_path / "config"
-    cfg_dir.mkdir()
+    shutil.copytree(DEFAULT_CONFIG_DIR, cfg_dir)
     (cfg_dir / "settings.yaml").write_text(
         "log_dir: " + json.dumps((tmp_path / "logs").as_posix()) + "\n"
         "monitoring:\n  max_job_age_hours: 26\n  max_failure_rate: 0.5\n  failure_window: 10\n"
         "expected_jobs: [" + JOB + "]\n",
         encoding="utf-8",
     )
-    from vehicle_intelligence.core.config import DEFAULT_CONFIG_DIR
-
-    for name in ("countries.yaml", "platforms.yaml", "vehicle_watchlist.yaml"):
-        (cfg_dir / name).write_text((DEFAULT_CONFIG_DIR / name).read_text(encoding="utf-8"), encoding="utf-8")
-
     db_url = f"sqlite:///{(tmp_path / 'cli.db').as_posix()}"
     create_schema(make_engine(db_url))
     # no runs yet -> job_never_ran -> CRITICAL (2)

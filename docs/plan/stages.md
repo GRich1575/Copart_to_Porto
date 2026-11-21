@@ -27,11 +27,11 @@ Depends: S0
 - [x] 1.5 Self-monitoring: run ledger, health checks, threshold alerts, no LLM — tests: tests/test_monitoring.py
 
 ## S2 — Import economics engine (pure logic, no network)
-Status: not started
+Status: done
 Depends: S1
-- [ ] 2.1 Watchlist matching (type, brand, model, year, cc, mileage cap) — tests: tests/test_watchlist.py
-- [ ] 2.2 Import cost model (auction fee, transport, container, port, last mile, duties, registration) — tests: tests/test_import_cost.py
-- [ ] 2.3 Profitability decision (resale ≥10% below local median, minimum edge, max bid) — tests: tests/test_profitability.py
+- [x] 2.1 Watchlist matching (type, brand, model, year, cc, mileage cap) — tests: tests/test_watchlist.py
+- [x] 2.2 Import cost model (auction fee, transport, container, port, last mile, duties, registration) — tests: tests/test_import_cost.py
+- [x] 2.3 Profitability decision (resale ≥10% below local median, minimum edge, max bid) — tests: tests/test_profitability.py
 
 ## S3 — Data collectors (external sites; needs verified sources)
 Status: not started

@@ -1,0 +1,16 @@
+# Import economics. Amounts in `currency`. Values marked [business_model] come from Business_Model.txt;
+# all others are 0 until verified (fees are to be sourced in S3 regulations / logistics collectors).
+currency: USD
+resale_discount: 0.10          # [business_model] resale price at least 10% below local market price
+min_edge: 1500                 # [business_model] minimal edge per vehicle, lower bound of 1500-2000
+min_comparables: 3             # local listings needed before a price is trusted
+auction_fee_percent: 0         # share of bid (per platform override later)
+auction_fee_fixed: 0
+transport_to_port: 0           # auction -> port
+port_load: 0                   # cost of loading in port of departure
+container_shipping: 350        # [business_model] container, USA -> EU
+port_unload: 0                 # cost of unloading in destination port
+documents_fee: 100             # [business_model] document fees
+last_mile: 0                   # destination port -> buyer location
+customs_duty_percent: 0        # applied to (bid + container shipping)
+registration_fee: 0
