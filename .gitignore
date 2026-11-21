@@ -22,3 +22,6 @@ data/logs/
 .vscode/
 .idea/
 Thumbs.db
+
+# SQLite for local runs without the project Postgres (owner data, not versioned)
+data/*.db

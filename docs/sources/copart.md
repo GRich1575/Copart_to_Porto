@@ -16,3 +16,9 @@ Status: decided 2026-11-21. Owner decision: platform = Copart (USA).
 ## Open
 - Confirm the owner's Copart membership and what the account exposes (current lots, purchase history).
 - Historical sold prices (S3.5) have no documented source yet.
+
+## Search-results export (owner-saved CSV, verified 2026-11-21)
+- File: "Download results" CSV from a logged-in search page. Imported by `scripts/import_copart_export.py` (adapter: `collectors/auctions/copart_search_export.py`).
+- Columns used: Lot #, Make, Model, Year, VIN, Odometer, Damage description, Title code, Current bid, Sale date, Lot URL.
+- Odometer "12,088 A": miles (assumed; US units), trailing " A" = actual reading. Sale date "MM/DD/YYYY hh:mm am|pm GMT"; "Future" or blank = no date.
+- Observed on the 15-lot export: 2 lots above 50,900 mi (the search's odometer filter does not enforce the cap exactly); 6 lots at 0 mi without a title (may mean "not reported").
