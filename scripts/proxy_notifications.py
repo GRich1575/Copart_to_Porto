@@ -2,7 +2,7 @@
 
 Usage:
   python scripts/proxy_notifications.py flag LOT_ID [--url URL]   # queue one reviewed lot
-  python scripts/proxy_notifications.py pending [--url URL]       # print unsent lot # / auction date / link
+  python scripts/proxy_notifications.py pending [--url URL]       # unsent: dated lots first, then WAITING (no date)
   python scripts/proxy_notifications.py sent ID [ID ...] [--url URL]  # mark as sent after you notify the dealer
 """
 
@@ -49,8 +49,9 @@ def main(argv: list[str] | None = None) -> int:
             rows = svc.pending(s_)
             if not rows:
                 print("no pending notifications")
-            for n in rows:
-                print(f"#{n.id}\tlot {n.lot_id}\t{_fmt_date(n.auction_date)}\t{n.lot_url}")
+            for n, date in rows:
+                tag = "WAITING" if svc.is_waiting(date) else "PRIORITY"
+                print(f"#{n.id}\t{tag}\tlot {n.lot_id}\t{_fmt_date(date)}\t{n.lot_url}")
         elif args.cmd == "sent":
             print(f"marked sent: {svc.mark_sent(s_, args.ids)}")
     return 0
