@@ -1,0 +1,11 @@
+# Runtime settings. Secrets are NOT stored here: DATABASE_URL comes from the environment.
+log_level: INFO
+log_dir: data/logs
+
+monitoring:
+  max_job_age_hours: 26      # job without a successful run for longer than this -> CRITICAL
+  max_failure_rate: 0.5      # share of failed runs in the last `failure_window` -> WARNING
+  failure_window: 10
+
+# Jobs that must run on schedule. Filled when collectors are added (S3).
+expected_jobs: []

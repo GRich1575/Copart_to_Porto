@@ -1,0 +1,7 @@
+# Auction / listing platforms. Keep enabled: false until access and terms are verified (S3).
+platforms:
+  - id: copart_us
+    name: Copart (USA)
+    country: US
+    kind: auction
+    enabled: false
