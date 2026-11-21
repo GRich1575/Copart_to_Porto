@@ -17,7 +17,6 @@ from vehicle_intelligence.core.config import VehicleSpec
 from vehicle_intelligence.models import AuctionLot, ProxyNotification
 from vehicle_intelligence.models.base import utcnow
 from vehicle_intelligence.monitoring.ledger import as_aware
-from vehicle_intelligence.services.title import title_exclusion
 from vehicle_intelligence.services.vehicle_matching import VehicleFacts, match_watchlist
 
 
@@ -43,9 +42,6 @@ def flag_lot(session: Session, lot_id: str, watchlist: list[VehicleSpec], platfo
         raise NotificationError(f"lot {lot_id} is not stored")
     if not (lot.title_type or "").strip():
         raise NotificationError(f"lot {lot_id} has no title: excluded (owner rule)")
-    reason = title_exclusion(lot.title_type)
-    if reason:
-        raise NotificationError(f"lot {lot_id}: {reason}")
     if not match_watchlist(_facts(lot), watchlist):
         raise NotificationError(f"lot {lot_id} does not match an active watchlist entry")
     existing = session.scalar(select(ProxyNotification).where(ProxyNotification.auction_lot_id == lot.id))

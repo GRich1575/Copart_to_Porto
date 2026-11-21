@@ -1,6 +1,6 @@
 # PROGRESS — Vehicle Import & Resale Intelligence Platform
 
-Updated: 2026-11-21 | Branch: feature/salvage-exclusion (PR pending) | main = waiting list merged (#11)
+Updated: 2026-11-21 | Branch: feature/waiting-list (PR pending) | main = proxy notifications merged (#10)
 Current stage: S3 in progress (3.1, 3.1b done). Next: S3.2–3.5 need sources; S4 needs S3.
 Requirements: `Business_Model.txt` (watch: Honda Gold Wing GL1800/F6B, year ≥ 2018, mileage ≤ 50 000 mi).
 Auction platform: Copart (USA). Access: owner-exported CSV only (`docs/sources/copart.md`).
@@ -28,9 +28,7 @@ Auction platform: Copart (USA). Access: owner-exported CSV only (`docs/sources/c
 - Mileage rule (owner, 2026-11-21): hard cap = 50 000 + 10 000 tolerance = 60 000 mi (step 2.4).
 - Step 2.5 (proxy notification): `scripts/proxy_notifications.py` flag / pending / sent. Flag only for a stored, titled lot that matches the watchlist, once per lot. Output: lot #, auction date, lot link.
 - Step 2.6 (waiting list): `pending` lists dated lots first (earliest date first), then WAITING lots (no auction date) in flag order. Dates read live, so a waiting lot moves up once a later import gives it a date.
-- Step 3.1e (salvage exclusion, owner, 2026-11-21): titles containing SALVAGE, NON-REPAIRABLE, JUNK or DESTRUCTION are rejected at import, purged by `--discard-excluded`, and refused by the proxy flag (`services/title.py`).
-- Local DB: all 4 remaining lots were salvage titles, so the purge emptied it (0 lots). Re-import is needed only if the title rule changes.
-- Tests: 107 pass, 1 skipped (Postgres integration).
+- Tests: 95 pass, 1 skipped (Postgres integration).
 - Title rule (owner, 2026-11-21, step 3.1c): lots without title are rejected at import and deleted from the local DB (`--discard-excluded`). Local DB now: 4 lots (all titled, ≤ 60 000 mi).
 - VIN rule (owner, 2026-11-21, step 3.1d): masked or partially masked VIN (contains '*') = kept; blank = kept; fully visible but malformed (not 17 chars, I/O/Q, or wrong North-American check digit) = excluded and discarded. Local DB: all 4 stored lots masked, so none discarded.
 
@@ -44,7 +42,7 @@ Auction platform: Copart (USA). Access: owner-exported CSV only (`docs/sources/c
 6. Economics: min_edge 1500 (lower bound) vs 2000; fee rates unset.
 
 ## Next steps
-1. Merge salvage-exclusion PR; sync main. 2. Owner: written Copart confirmation for manual CSV use; choose Copart broker. 3. S3.2 sources.
+1. Merge waiting-list PR; sync main. 2. Owner: written Copart confirmation for manual CSV use; choose Copart broker. 3. S3.2 sources.
 2. Owner: destination EU country, local-market sources (3.2), Copart CSV export path.
 
 ## Update rule

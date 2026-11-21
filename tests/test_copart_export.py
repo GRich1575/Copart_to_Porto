@@ -42,7 +42,7 @@ def sf(tmp_path):
 
 def test_column_conversions(export):
     rows, errors = parse_search_export(export(_row("111", odo="12,088 A", bid="1,800 USD",
-                                                   sale="11/25/2026 06:00 pm GMT", title="CERT OF TITLE-REBUILT"),
+                                                   sale="11/25/2026 06:00 pm GMT", title="SALVAGE VEHICLE TITLE"),
                                               _row("222", odo="2,872", sale="Future", bid="0 USD")),
                                           vehicle_type="motorcycle")
     assert errors == []
@@ -52,7 +52,7 @@ def test_column_conversions(export):
     assert a.current_bid == Decimal("1800") and b.current_bid == Decimal("0")
     assert a.auction_date == datetime(2026, 11, 25, 18, 0, tzinfo=timezone.utc)  # pm -> 18:00 UTC
     assert b.auction_date is None                                     # "Future"
-    assert a.title_type == "CERT OF TITLE-REBUILT" and b.title_type == "CERT OF TITLE"
+    assert a.title_type == "SALVAGE VEHICLE TITLE" and b.title_type == "CERT OF TITLE"
     assert a.status == "listed" and a.vehicle_type == "motorcycle"
     assert a.source_url == URL.format("111")
 

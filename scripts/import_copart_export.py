@@ -31,13 +31,10 @@ def main(argv: list[str] | None = None) -> int:
     setup_logging(cfg.settings.log_level, Path(cfg.settings.log_dir))
     engine = make_engine(args.url or cfg.settings.database_url)
     create_schema(engine)
-    try:
-        accepted, rejected = import_search_export(args.file, make_session_factory(engine), args.vehicle_type)
-        print(f"accepted: {accepted}  rejected: {len(rejected)}")
-        for line, msg in rejected:
-            print(f"  line {line}: {msg}")
-    except ValueError as exc:  # no valid rows: recorded as failed run; purge still applies
-        print(f"import: {exc}")
+    accepted, rejected = import_search_export(args.file, make_session_factory(engine), args.vehicle_type)
+    print(f"accepted: {accepted}  rejected: {len(rejected)}")
+    for line, msg in rejected:
+        print(f"  line {line}: {msg}")
     if args.discard_excluded:
         cap = max(v.mileage_cap_miles for v in cfg.watchlist if v.active)
         print(f"discarded stored lots: {discard_excluded(make_session_factory(engine), mileage_cap=cap)} (cap {cap} mi)")
