@@ -20,7 +20,7 @@ Depends: —
 ## S1 — Foundation (config, DB, self-monitoring)
 Status: not started
 Depends: S0
-- [ ] 1.1 Package skeleton, pyproject, pytest setup — tests: tests/test_skeleton.py
+- [x] 1.1 Package skeleton, pyproject, pytest setup — tests: tests/test_skeleton.py
 - [ ] 1.2 Config loader (settings + countries/platforms/watchlist YAML, validated) — tests: tests/test_config.py
 - [ ] 1.3 Logging setup (structured, file + stdout) — tests: tests/test_logging.py
 - [ ] 1.4 PostgreSQL schema (SQLAlchemy 2) + init_db script — tests: tests/test_db_schema.py
