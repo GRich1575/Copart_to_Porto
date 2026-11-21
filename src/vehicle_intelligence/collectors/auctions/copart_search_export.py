@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from vehicle_intelligence.collectors.auctions.copart_import import PLATFORM_ID, LotRow, upsert_lots
 from vehicle_intelligence.models import AuctionLot
+from vehicle_intelligence.services.title import title_exclusion
 from vehicle_intelligence.services.vin import vin_status
 from vehicle_intelligence.models.base import utcnow
 from vehicle_intelligence.monitoring import tracked_run
@@ -73,6 +74,10 @@ def parse_search_export(path: Path, vehicle_type: str | None = None) -> tuple[li
             if not _blank(raw.get("Title code")):
                 errors.append((line_no, "no title: excluded (owner rule)"))
                 continue
+            reason = title_exclusion(raw.get("Title code"))
+            if reason:
+                errors.append((line_no, reason))
+                continue
             if vin_status(raw.get("VIN")) == "invalid":
                 errors.append((line_no, "invalid VIN: excluded (owner rule)"))
                 continue
@@ -114,10 +119,15 @@ def discard_excluded(session_factory: sessionmaker[Session], mileage_cap: int | 
         bad_vin_ids = [lot.id for lot in s.scalars(
             select(AuctionLot).where(AuctionLot.platform_id == PLATFORM_ID, AuctionLot.vin.is_not(None)))
             if vin_status(lot.vin) == "invalid"]
+        bad_title_ids = [lot.id for lot in s.scalars(
+            select(AuctionLot).where(AuctionLot.platform_id == PLATFORM_ID, AuctionLot.title_type.is_not(None)))
+            if title_exclusion(lot.title_type)]
+        if bad_title_ids:
+            s.execute(delete(AuctionLot).where(AuctionLot.id.in_(bad_title_ids)))
         if bad_vin_ids:
             s.execute(delete(AuctionLot).where(AuctionLot.id.in_(bad_vin_ids)))
         s.commit()
-    return (result.rowcount or 0) + len(bad_vin_ids)
+    return (result.rowcount or 0) + len(bad_vin_ids) + len(bad_title_ids)
 
 
 def import_search_export(path: Path, session_factory: sessionmaker[Session],
