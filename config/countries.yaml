@@ -1,7 +1,10 @@
 # Countries involved in the chain. role: origin (auction side) | destination (import side).
-# Destination country is not chosen yet (Business_Model.txt) — add it before S2.
 countries:
   - code: US
     name: United States
     currency: USD
     role: origin
+  - code: PT
+    name: Portugal
+    currency: EUR
+    role: destination
