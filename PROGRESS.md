@@ -5,6 +5,8 @@ Current stage: S3 in progress (3.1, 3.1b–e, 3.2 done). Next: 3.3 regulations (
 Requirements: `Business_Model.txt` (watch: Honda Gold Wing GL1800/F6B, year ≥ 2018, mileage ≤ 50 000 mi).
 Auction platform: Copart (USA). Access: owner-exported CSV only (`docs/sources/copart.md`).
 
+Owner decision (2026-11-21): warranty offered to buyers is at most 3 months. Not a statutory figure.
+
 ## Stage map (full detail + DoD: `docs/plan/stages.md`)
 | Stage | Content | Depends | Status |
 |---|---|---|---|
