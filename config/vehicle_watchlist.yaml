@@ -1,0 +1,10 @@
+# Vehicles to search for (Business_Model.txt, item 0). Add entries; set active: false to pause.
+vehicles:
+  - id: honda-gold-wing-2018
+    vehicle_type: motorcycle
+    brand: Honda
+    model: Gold Wing
+    variants: ["GL1800", "F6B"]
+    min_year: 2018
+    max_mileage_miles: 50000
+    active: true
